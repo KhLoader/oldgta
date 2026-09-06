@@ -98,3 +98,105 @@ if (typeof window !== 'undefined') {
     window.__epHudConfig.konfigHud = window.__epHudConfig.konfigHud || _hudAssets;
 }
 
+(function () {
+    if (window.__customSafeZoneInitialized) return;
+    window.__customSafeZoneInitialized = true;
+
+    const config = {
+        text: ' ',
+        iconImageURL: 'https://i.postimg.cc/T3nkT8sB/zone2.png',
+        backgroundImage: 'https://i.postimg.cc/T3nkT8sB/zone2.png'    };
+    window.forceSafeZoneUpdate = function() {
+        updateSafeZoneElements();
+    };
+
+    const safeZoneStyles = document.createElement('style');
+    safeZoneStyles.id = 'custom-safe-zone-styles';
+    safeZoneStyles.textContent = `
+        .hud-radmir-radar__safe-zone {
+            position: absolute;
+            top: -5.5vh;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 1vh;
+            padding: 1vh 2vh;
+            font-family: 'GothamPro Bold', sans-serif;
+            font-size: 1.85vh;
+            color: #f5eded;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        .hud-radmir-radar__safe-zone__bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: ${config.backgroundImage || 'linear-gradient(90deg, rgba(101, 196, 102, 0) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(101, 196, 102, 0) 100%)'};
+            filter: blur(1.5vh);
+            border-radius: 2vh;
+            z-index: -1;
+        }
+        
+        .hud-radmir-radar__safe-zone__icon {
+            width: 2.5vh;
+            height: auto;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+        
+        .hud-radmir-radar__safe-zone__text {
+            white-space: nowrap;
+            z-index: 1;
+            text-shadow: 0 0.2vh 0.4vh rgba(0, 0, 0, 0.5);
+        }
+    `;
+    document.head.appendChild(safeZoneStyles);
+    function updateSafeZoneElements() {
+        const safeZoneContainers = document.querySelectorAll('.hud-radmir-radar__safe-zone');
+        safeZoneContainers.forEach(container => {
+            container.innerHTML = '';
+            const bgDiv = document.createElement('div');
+            bgDiv.className = 'hud-radmir-radar__safe-zone__bg';
+            if (config.backgroundImage) {
+                bgDiv.style.background = config.backgroundImage;
+            }
+            container.appendChild(bgDiv);
+            const imgElement = document.createElement('img');
+            imgElement.src = config.iconImageURL.trim();
+            imgElement.className = 'hud-radmir-radar__safe-zone__icon';
+            imgElement.alt = 'Safe Zone Icon';
+            imgElement.onerror = function() {
+                console.error('Failed to load image:', config.iconImageURL);
+            };
+            container.appendChild(imgElement);
+
+            const textSpan = document.createElement('span');
+            textSpan.className = 'hud-radmir-radar__safe-zone__text';
+            textSpan.textContent = config.text;
+            container.appendChild(textSpan);
+        });
+    }
+    const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+            if (mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        if (node.classList?.contains('hud-radmir-radar__safe-zone') ||
+                            node.querySelector?.('.hud-radmir-radar__safe-zone')) {
+                            setTimeout(updateSafeZoneElements, 0);
+                        }
+                    }
+                });
+            }
+        }
+    });
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+    setTimeout(updateSafeZoneElements, 500);
+})();
