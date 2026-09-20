@@ -154,7 +154,7 @@ const NOTIFICATION_CONFIG = {
         const cfg = (typeof NOTIFICATION_CONFIG !== 'undefined') ? NOTIFICATION_CONFIG : {};
         const text = (window.epilepsialoader && window.epilepsialoader.notification && window.epilepsialoader.notification.text)
                      || cfg.text
-                     || "fix 1";
+                     || "Сборка успешно загружена!";
 
         if (!text || !text.trim() || (cfg.enabled === false)) return;
 
@@ -171,10 +171,9 @@ const NOTIFICATION_CONFIG = {
             notifyBox.textContent = text;
             notifyBox.style.cssText = [
                 'position: fixed !important;',
-                'left: 50% !important;',
-                'top: 56% !important;',
-                'transform: translate(-50%, -50%) !important;',
-                'background: #232323 !important;',
+                'right: 2.5vh !important;',
+                'bottom: 2.5vh !important;',
+                'background: rgba(138, 138, 138, 0.7) !important;',
                 'color: #ffffff !important;',
                 'padding: 1.2vh 2.8vh !important;',
                 'border-radius: 0.8vh !important;',
@@ -185,8 +184,7 @@ const NOTIFICATION_CONFIG = {
                 'display: flex !important;',
                 'align-items: center !important;',
                 'justify-content: center !important;',
-                'box-shadow: none !important;',
-                'text-shadow: none !important;',
+                'box-shadow: 0.4vh 0.6vh 1.4vh rgba(0, 0, 0, 0.45) !important;',
                 'border: none !important;',
                 'outline: none !important;',
                 'z-index: 999999 !important;',
