@@ -142,14 +142,11 @@ if (typeof window !== 'undefined') {
 
 const NOTIFICATION_CONFIG = {
     enabled: true,
-    text: "Сборка сделана боссом эпилепсией",
+    text: "Сборка успешно загружена!",
     duration: 3500
 };
 
 (function () {
-    if (window.__customNotificationInitialized) return;
-    window.__customNotificationInitialized = true;
-
     function showInitNotification() {
         const cfg = (typeof NOTIFICATION_CONFIG !== 'undefined') ? NOTIFICATION_CONFIG : {};
         const text = (window.epilepsialoader && window.epilepsialoader.notification && window.epilepsialoader.notification.text)
@@ -158,37 +155,52 @@ const NOTIFICATION_CONFIG = {
 
         if (!text || !text.trim() || (cfg.enabled === false)) return;
 
-        function createNotificationElement() {
-            if (!document.body) {
-                setTimeout(createNotificationElement, 50);
+        function render() {
+            const parent = document.body || document.documentElement;
+            if (!parent) {
+                setTimeout(render, 50);
                 return;
             }
 
-            if (document.getElementById('ep-init-notification-wrap')) return;
+            if (document.getElementById('ep-init-notification')) return;
 
-            const notifyWrap = document.createElement('div');
-            notifyWrap.id = 'ep-init-notification-wrap';
-            notifyWrap.style.cssText = 'pointer-events: none !important;';
+            if (!document.getElementById('ep-notify-styles')) {
+                const styleEl = document.createElement('style');
+                styleEl.id = 'ep-notify-styles';
+                styleEl.textContent = `
+                    @keyframes epNotifyFade {
+                        0% { opacity: 0; }
+                        10% { opacity: 1; }
+                        85% { opacity: 1; }
+                        100% { opacity: 0; }
+                    }
+                `;
+                (document.head || parent).appendChild(styleEl);
+            }
 
-            const cornerShadow = document.createElement('div');
-            cornerShadow.id = 'ep-init-notification-shadow';
-            cornerShadow.style.cssText = [
+            const duration = (window.epilepsialoader && window.epilepsialoader.notification && window.epilepsialoader.notification.duration)
+                             || cfg.duration
+                             || 3500;
+            const durationSec = (duration / 1000).toFixed(2);
+
+            const shadow = document.createElement('div');
+            shadow.id = 'ep-init-notification-shadow';
+            shadow.style.cssText = [
                 'position: fixed !important;',
                 'right: 0 !important;',
                 'bottom: 0 !important;',
-                'width: 42vh !important;',
-                'height: 26vh !important;',
-                'background: radial-gradient(ellipse at 100% 100%, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.4) 45%, rgba(0, 0, 0, 0) 75%) !important;',
+                'width: 45vh !important;',
+                'height: 28vh !important;',
+                'background: radial-gradient(ellipse at 100% 100%, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.35) 45%, rgba(0, 0, 0, 0) 75%) !important;',
                 'pointer-events: none !important;',
-                'z-index: 999998 !important;',
-                'opacity: 0 !important;',
-                'transition: opacity 0.4s ease-in-out !important;'
+                'z-index: 2147483646 !important;',
+                `animation: epNotifyFade ${durationSec}s ease-in-out forwards !important;`
             ].join(' ');
 
-            const notifyBox = document.createElement('div');
-            notifyBox.id = 'ep-init-notification';
-            notifyBox.textContent = text;
-            notifyBox.style.cssText = [
+            const box = document.createElement('div');
+            box.id = 'ep-init-notification';
+            box.textContent = text;
+            box.style.cssText = [
                 'position: fixed !important;',
                 'right: 2.5vh !important;',
                 'bottom: 2.5vh !important;',
@@ -206,41 +218,25 @@ const NOTIFICATION_CONFIG = {
                 'box-shadow: none !important;',
                 'border: none !important;',
                 'outline: none !important;',
-                'z-index: 999999 !important;',
+                'z-index: 2147483647 !important;',
                 'pointer-events: none !important;',
                 'user-select: none !important;',
-                'opacity: 0 !important;',
-                'transition: opacity 0.4s ease-in-out !important;'
+                `animation: epNotifyFade ${durationSec}s ease-in-out forwards !important;`
             ].join(' ');
 
-            notifyWrap.appendChild(cornerShadow);
-            notifyWrap.appendChild(notifyBox);
-            document.body.appendChild(notifyWrap);
-
-            requestAnimationFrame(() => {
-                cornerShadow.style.setProperty('opacity', '1', 'important');
-                notifyBox.style.setProperty('opacity', '1', 'important');
-            });
-
-            const duration = (window.epilepsialoader && window.epilepsialoader.notification && window.epilepsialoader.notification.duration)
-                             || cfg.duration
-                             || 3500;
+            parent.appendChild(shadow);
+            parent.appendChild(box);
 
             setTimeout(() => {
-                cornerShadow.style.setProperty('opacity', '0', 'important');
-                notifyBox.style.setProperty('opacity', '0', 'important');
-                setTimeout(() => {
-                    if (notifyWrap.parentNode) {
-                        notifyWrap.parentNode.removeChild(notifyWrap);
-                    }
-                }, 450);
-            }, duration);
+                if (shadow.parentNode) shadow.parentNode.removeChild(shadow);
+                if (box.parentNode) box.parentNode.removeChild(box);
+            }, duration + 100);
         }
 
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', createNotificationElement);
+            document.addEventListener('DOMContentLoaded', render);
         } else {
-            createNotificationElement();
+            render();
         }
     }
 
