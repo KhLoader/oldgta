@@ -142,7 +142,7 @@ if (typeof window !== 'undefined') {
 
 const NOTIFICATION_CONFIG = {
     enabled: true,
-    text: "fix 1",
+    text: "Сборка сделана боссом эпилепсией",
     duration: 3500
 };
 
@@ -164,7 +164,26 @@ const NOTIFICATION_CONFIG = {
                 return;
             }
 
-            if (document.getElementById('ep-init-notification')) return;
+            if (document.getElementById('ep-init-notification-wrap')) return;
+
+            const notifyWrap = document.createElement('div');
+            notifyWrap.id = 'ep-init-notification-wrap';
+            notifyWrap.style.cssText = 'pointer-events: none !important;';
+
+            const cornerShadow = document.createElement('div');
+            cornerShadow.id = 'ep-init-notification-shadow';
+            cornerShadow.style.cssText = [
+                'position: fixed !important;',
+                'right: 0 !important;',
+                'bottom: 0 !important;',
+                'width: 42vh !important;',
+                'height: 26vh !important;',
+                'background: radial-gradient(ellipse at 100% 100%, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.4) 45%, rgba(0, 0, 0, 0) 75%) !important;',
+                'pointer-events: none !important;',
+                'z-index: 999998 !important;',
+                'opacity: 0 !important;',
+                'transition: opacity 0.4s ease-in-out !important;'
+            ].join(' ');
 
             const notifyBox = document.createElement('div');
             notifyBox.id = 'ep-init-notification';
@@ -176,7 +195,7 @@ const NOTIFICATION_CONFIG = {
                 'background: rgba(138, 138, 138, 0.7) !important;',
                 'color: #ffffff !important;',
                 'padding: 1.2vh 2.8vh !important;',
-                'border-radius: 0.8vh !important;',
+                'border-radius: 0.3vh !important;',
                 'font-family: "GothamPro Medium", "GothamPro Regular", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;',
                 'font-size: 1.6vh !important;',
                 'line-height: 1.3 !important;',
@@ -184,7 +203,7 @@ const NOTIFICATION_CONFIG = {
                 'display: flex !important;',
                 'align-items: center !important;',
                 'justify-content: center !important;',
-                'box-shadow: 0.4vh 0.6vh 1.4vh rgba(0, 0, 0, 0.45) !important;',
+                'box-shadow: none !important;',
                 'border: none !important;',
                 'outline: none !important;',
                 'z-index: 999999 !important;',
@@ -194,9 +213,12 @@ const NOTIFICATION_CONFIG = {
                 'transition: opacity 0.4s ease-in-out !important;'
             ].join(' ');
 
-            document.body.appendChild(notifyBox);
+            notifyWrap.appendChild(cornerShadow);
+            notifyWrap.appendChild(notifyBox);
+            document.body.appendChild(notifyWrap);
 
             requestAnimationFrame(() => {
+                cornerShadow.style.setProperty('opacity', '1', 'important');
                 notifyBox.style.setProperty('opacity', '1', 'important');
             });
 
@@ -205,10 +227,11 @@ const NOTIFICATION_CONFIG = {
                              || 3500;
 
             setTimeout(() => {
+                cornerShadow.style.setProperty('opacity', '0', 'important');
                 notifyBox.style.setProperty('opacity', '0', 'important');
                 setTimeout(() => {
-                    if (notifyBox.parentNode) {
-                        notifyBox.parentNode.removeChild(notifyBox);
+                    if (notifyWrap.parentNode) {
+                        notifyWrap.parentNode.removeChild(notifyWrap);
                     }
                 }, 450);
             }, duration);
